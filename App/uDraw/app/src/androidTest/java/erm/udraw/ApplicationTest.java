@@ -1,4 +1,4 @@
-package erm.myapplication;
+package erm.udraw;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

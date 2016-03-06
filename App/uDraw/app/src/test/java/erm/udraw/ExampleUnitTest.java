@@ -1,4 +1,4 @@
-package erm.myapplication;
+package erm.udraw;
 
 import org.junit.Test;
 
