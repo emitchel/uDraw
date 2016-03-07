@@ -17,4 +17,13 @@
 
     <string name="undo_all_changes">New Page</string>
     <string name="sure_undo">Are you sure you want to erase your masterpiece?</string>
+
+    <string name="save_picture">Save your image</string>
+    <string name="give_picture_name">Give your picture a name</string>
+    <string name="file_name">Specify file name</string>
+    <string name="failed_to_specify">Failed to specify file name</string>
+
+
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 </resources>
