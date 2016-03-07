@@ -5,4 +5,13 @@
 
     <string name="dev_name">Elliot Mitchell</string>
     <string name="by_dev_name">by Elliot Mitchell</string>
+
+    <!-- Menu Options -->
+    <string name="new_image">New Image</string>
+    <string name="import_image">Import Image</string>
+    <string name="from_gallery">From Gallery</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="save_image">Save Image</string>
+    <string name="share_image">Share Image</string>
+    <string name="about">About</string>
 </resources>

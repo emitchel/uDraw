@@ -64,9 +64,10 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void goToHomeActivity() {
-        log("Going to Home Activity");
-        Intent intent = new Intent(this, Home.class);
-        goToActivity(intent, null,0,0);
+        log("Going to HomeActivity Activity");
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        goToActivity(intent, null, 0, 0);
     }
 
     private void gatherViews() {
