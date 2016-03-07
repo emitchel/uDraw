@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">uDraw</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="dev_name">Elliot Mitchell</string>
+    <string name="by_dev_name">by Elliot Mitchell</string>
 </resources>
