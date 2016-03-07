@@ -6,26 +6,29 @@
         android:id="@+id/new_image"
         android:orderInCategory="100"
         android:title="@string/new_image"
-        android:icon="@drawable/ic_clear_white_36dp"
+        android:icon="@drawable/ic_restore_page_white_36dp"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/save_image"
+        android:orderInCategory="100"
+        android:title="@string/save_image"
+        android:icon="@drawable/ic_save_white_36dp"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/share_image"
+        android:orderInCategory="100"
+        android:title="@string/share_image"
+        android:icon="@drawable/ic_share_white_36dp"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/import_image"
         android:orderInCategory="100"
         android:title="@string/import_image"
         android:icon="@drawable/ic_input_white_36dp"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/save_image"
-        android:orderInCategory="100"
-        android:title="@string/save_image"
-        android:icon="@drawable/ic_save_white_36dp"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/share_image"
-        android:orderInCategory="100"
-        android:title="@string/share_image"
-        android:icon="@drawable/ic_share_white_36dp"
-        app:showAsAction="ifRoom" />
+
+
     <item
         android:id="@+id/about"
         android:orderInCategory="100"

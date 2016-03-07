@@ -31,4 +31,15 @@
         android:text="@string/by_dev_name"
         android:textColor="@color/icons"
         android:alpha="0"/>
+
+    <ImageView
+        android:id="@+id/launcher"
+        android:src="@drawable/ic_pen"
+        android:alpha="0"
+        android:scaleType="fitCenter"
+        android:padding="@dimen/default_padding"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

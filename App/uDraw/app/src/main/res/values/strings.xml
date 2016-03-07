@@ -14,4 +14,7 @@
     <string name="save_image">Save Image</string>
     <string name="share_image">Share Image</string>
     <string name="about">About</string>
+
+    <string name="undo_all_changes">New Page</string>
+    <string name="sure_undo">Are you sure you want to erase your masterpiece?</string>
 </resources>

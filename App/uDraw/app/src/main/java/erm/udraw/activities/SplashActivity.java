@@ -6,14 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.ImageView;
 import android.widget.TextView;
-
 import erm.udraw.R;
 import erm.udraw.objects.Constants;
+
+
 
 public class SplashActivity extends BaseActivity {
 
     TextView mTitle, mSignature;
+    ImageView mImage;
 
     Context mContext;
 
@@ -37,6 +40,8 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void animateUI() {
+        //Fade in image
+        mImage.animate().alpha(1f).setDuration(Constants.LONG_DURATION).setListener(null);
         //Fade in Title
         mTitle.animate().alpha(1f).setDuration(Constants.LONG_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -56,7 +61,7 @@ public class SplashActivity extends BaseActivity {
                                 goToHomeActivity();
 
                             }
-                        }, Constants.LONG_DURATION);
+                        }, Constants.SUPER_LONG_DURATION);
                     }
                 });
             }
@@ -73,6 +78,7 @@ public class SplashActivity extends BaseActivity {
     private void gatherViews() {
         mTitle = (TextView) findViewById(R.id.title);
         mSignature = (TextView) findViewById(R.id.signature);
+        mImage = (ImageView)findViewById(R.id.launcher);
     }
 
     @Override
