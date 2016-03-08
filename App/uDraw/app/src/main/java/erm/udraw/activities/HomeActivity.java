@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import erm.udraw.R;
+import erm.udraw.fragments.HomeFragment;
 import erm.udraw.objects.CapturePhotoUtils;
 import erm.udraw.objects.Utils;
 
@@ -147,8 +149,12 @@ public class HomeActivity extends BaseActivity {
     }
 
     private Bitmap getBitmapFromCanvas() {
-        //TODO:Get bitmap from fragment
-        return null;
+        HomeFragment frag = getFragment();
+        if(frag!=null){
+            return frag.getBitmap();
+        } else {
+            return null;
+        }
     }
 
     private void saveFile() {
@@ -208,7 +214,10 @@ public class HomeActivity extends BaseActivity {
                 .setMessage(getString(R.string.sure_undo))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO: Clear canvas in fragment
+                        HomeFragment frag = getFragment();
+                        if (frag != null) {
+                            frag.clearCanvas();
+                        }
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -217,6 +226,12 @@ public class HomeActivity extends BaseActivity {
                     }
                 })
                 .show();
+    }
+
+    public HomeFragment getFragment(){
+        FragmentManager fm = getSupportFragmentManager();
+        HomeFragment fragment = (HomeFragment)fm.findFragmentById(R.id.canvas_fragment);
+        return fragment;
     }
 
     @Override
