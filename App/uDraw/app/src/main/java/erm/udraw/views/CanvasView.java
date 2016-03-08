@@ -5,8 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,63 +15,69 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import erm.udraw.objects.Utils;
+
 /**
  * Created by ellio on 3/7/2016.
  */
 public class CanvasView extends View implements View.OnTouchListener {
-    private static int DEFAULT_STROKE_WIDTH = 6;
+    private static float DEFAULT_STROKE_WIDTH = 12f;
 
     private Bitmap mBitmap;
     Canvas mCanvas;
-    Path mPath;
-    Paint mPaint;
-    Color mCurrentColor;
+    Color mCurrentColor, mOldColor;
+    float mCurrentSize;
 
-    Stack<Path> mPaths = new Stack<Path>();
-    Stack<Path> mUndonePaths = new Stack<Path>();
+    Stack<Stroke> mStrokes = new Stack<Stroke>();
+    Stack<Stroke> mUndoneStrokes = new Stack<Stroke>();
     Map mHistory = new HashMap();
 
     private float mX, mY;
     private static final float TOLERANCE = 5;
 
 
-    public CanvasView(Context context)
-    {
+    public CanvasView(Context context) {
         super(context);
         init();
     }
-    public CanvasView(Context context, AttributeSet attrs)
-    {
+
+    public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
+
     public CanvasView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
     }
 
-    private void init(){
+
+    private void init() {
+        setBackgroundColor(android.graphics.Color.WHITE);
         setFocusable(true);
         setFocusableInTouchMode(true);
         this.setOnTouchListener(this);
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setDither(true);
-        this.setDrawingCacheEnabled(true);
-        mPaint.setColor(Color.BLACK.hex);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setXfermode(null);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
-        mCanvas = new Canvas();
-        mPath = new Path();
-        mPaths.add(mPath);
+        mOldColor = mCurrentColor = Color.BLACK;
+        mCurrentSize = DEFAULT_STROKE_WIDTH;
+
+    }
+
+    private Paint getNewPaint() {
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(mCurrentColor.hex);
+        paint.setStrokeWidth(mCurrentSize);
+
+        return paint;
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return false;
+    }
+
+    public enum History {
+        FORWARD, BACKWARD
     }
 
     /**
@@ -89,7 +94,8 @@ public class CanvasView extends View implements View.OnTouchListener {
         BLACK(android.graphics.Color.BLACK), DARK_GRAY(android.graphics.Color.DKGRAY),
         LIGHT_GRAY(android.graphics.Color.LTGRAY), BLUE(android.graphics.Color.BLUE),
         RED(android.graphics.Color.RED), GREEN(android.graphics.Color.GREEN),
-        ORANGE(0xFFA500), YELLOW(android.graphics.Color.YELLOW);
+        ORANGE(0xFFA500), YELLOW(android.graphics.Color.YELLOW), WHITE(android.graphics.Color.WHITE);
+
 
         int hex;
 
@@ -100,14 +106,32 @@ public class CanvasView extends View implements View.OnTouchListener {
         public static ArrayList<Color> getArrayListOfAvailableColors() {
             ArrayList<Color> arrayList = new ArrayList<Color>();
             for (Color clr : Color.values()) {
-                arrayList.add(clr);
+                if (clr != WHITE)
+                    arrayList.add(clr);
             }
             return arrayList;
         }
-    }
+        }
 
     public ArrayList<Color> getAvailableColors() {
         return Color.getArrayListOfAvailableColors();
+    }
+
+    public void goHistory(History direction) {
+        if (direction == History.FORWARD) {
+            //Redo
+            if (mUndoneStrokes.size() > 0) {
+                mStrokes.push(mUndoneStrokes.pop());
+                invalidate();
+            }
+        } else {
+            //Undo
+            if (mStrokes.size() > 0) {
+                mUndoneStrokes.push(mStrokes.pop());
+                invalidate();
+            }
+
+        }
     }
 
     public Color getCurrentColor() {
@@ -115,12 +139,11 @@ public class CanvasView extends View implements View.OnTouchListener {
     }
 
     public void setColor(Color newColor) {
-        mPaint.setColor(newColor.hex);
         this.mCurrentColor = newColor;
     }
 
     public void setStrokeWidth(float newStroke) {
-        mPaint.setStrokeWidth(newStroke);
+        this.mCurrentSize = newStroke;
     }
 
     private void addHistory(Path path, Action action) {
@@ -128,10 +151,18 @@ public class CanvasView extends View implements View.OnTouchListener {
     }
 
 
-    private void setEraserMode() {
-        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+    /**
+     * Yes this is NOT a real eraser, I believe a different approach would need to be implemented
+     */
+    public void setEraserMode() {
+        mOldColor = mCurrentColor;
+        mCurrentColor = Color.WHITE;
+
     }
 
+    public void setPenMode() {
+        mCurrentColor = mOldColor;
+    }
 
 
     // override onSizeChanged
@@ -148,68 +179,112 @@ public class CanvasView extends View implements View.OnTouchListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        // draw the mPath with the mPaint on the canvas when onDraw
-        for (Path p : mPaths){
-            canvas.drawPath(p, mPaint);
+        if (mStrokes != null) {
+            for (Stroke stroke: mStrokes) {
+                if (stroke != null) {
+                    Path path = stroke.getPath();
+                    Paint painter = stroke.getPaint();
+                    if ((path != null) && (painter != null)) {
+                        canvas.drawPath(path, painter);
+                    }
+                }
+            }
         }
-        canvas.drawPath(mPath, mPaint);
     }
 
     // when ACTION_DOWN start touch according to the x,y values
-    private void startTouch(float x, float y) {
-        mPath.moveTo(x, y);
+    private void startTouch(int x, int y) {
+        //create a paint with random color
+        Paint paint = getNewPaint();
+
+        //create the Stroke
+        Point pt = new Point(x, y);
+        Stroke stroke = new Stroke(paint);
+        stroke.addPoint(pt);
+        mStrokes.push(stroke);
         mX = x;
         mY = y;
     }
 
-    // when ACTION_MOVE move touch according to the x,y values
-    private void moveTouch(float x, float y) {
+    private void pointMove(float x, float y) {
+        //retrieve the stroke and add new point to its path
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOLERANCE || dy >= TOLERANCE) {
-            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-            mX = x;
-            mY = y;
+            Stroke stroke = mStrokes.peek();
+            if (stroke != null) {
+                stroke.getPath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+
+                mX = x;
+                mY = y;
+            }
         }
+
     }
 
     public void clearCanvas() {
-        mPaths.clear();
-        mUndonePaths.clear();
-        mPath.reset();
+        mStrokes.clear();
+        mUndoneStrokes.clear();
         invalidate();
     }
 
-    // when ACTION_UP stop touch
-    private void upTouch() {
-        mPath.lineTo(mX, mY);
-    }
 
     //override the onTouchEvent
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
+        final int action = event.getActionMasked();
+        final int pointerCount = event.getPointerCount();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                startTouch(x, y);
-                invalidate();
+                startTouch((int) x, (int) y);
+
                 break;
             case MotionEvent.ACTION_MOVE:
-                moveTouch(x, y);
-                invalidate();
+                pointMove(x, y);
+
                 break;
             case MotionEvent.ACTION_UP:
-                upTouch();
-                invalidate();
+
                 break;
         }
+        invalidate();
         return true;
     }
 
-    public Bitmap getBitmap(){
-        return this.getDrawingCache();
+    public Bitmap getBitmap() {
+        return Utils.getBitmapFromView(this);
+
+    }
+
+
+    // _Name meaning inner class attribute
+    public class Stroke {
+        private Path _path;
+        private Paint _paint;
+
+        public Stroke(Paint paint) {
+            _paint = paint;
+        }
+
+        public Path getPath() {
+            return _path;
+        }
+
+        public Paint getPaint() {
+            return _paint;
+        }
+
+        public void addPoint(Point pt) {
+            if (_path == null) {
+                _path = new Path();
+                _path.moveTo(pt.x, pt.y);
+            } else {
+                _path.lineTo(pt.x, pt.y);
+            }
+        }
     }
 
 

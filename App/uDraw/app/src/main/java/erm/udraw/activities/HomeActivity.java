@@ -119,7 +119,10 @@ public class HomeActivity extends BaseActivity {
             //we're just going to automatically save it
             String mPath = getFullPathOfUDrawFiles() + getTimeDateFileName();
 
-            // create bitmap screen capture
+            /**
+             * I could easily just get the Bitmap of the canvas but
+             * requirements specified a screen shot, so thats what this is
+             */
             View v1 = getWindow().getDecorView().getRootView();
             v1.setDrawingCacheEnabled(true);
             Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());

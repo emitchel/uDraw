@@ -47,13 +47,49 @@ public class HomeFragment extends Fragment {
 
     }
 
-    
+    /**
+     * Small method to fade in one view while fading out another
+     * @param fadeIn
+     * @param fadeOut
+     */
+    private void fadeInFadeOut(View fadeIn, View fadeOut){
+        if(fadeIn.getAlpha()<=0f){
+            fadeIn.animate().alpha(1f).setListener(null);
+        }
+
+        if(fadeOut.getAlpha()>=1f){
+            fadeOut.animate().alpha(0f).setListener(null);
+        }
+    }
 
     private void setCustomListeners(){
         mDraw.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                fadeInFadeOut(mDrawSelected,mEraseSelected);
+                mCanvas.setPenMode();
+            }
+        });
 
+        mErase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fadeInFadeOut(mEraseSelected,mDrawSelected);
+                mCanvas.setEraserMode();
+            }
+        });
+
+        mUndo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCanvas.goHistory(CanvasView.History.BACKWARD);
+            }
+        });
+
+        mRedo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCanvas.goHistory(CanvasView.History.FORWARD);
             }
         });
     }

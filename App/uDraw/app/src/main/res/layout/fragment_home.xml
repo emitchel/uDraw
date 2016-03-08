@@ -2,7 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/icons"
     tools:context=".fragments.HomeFragment"
+
     tools:showIn="@layout/activity_home">
 
     <LinearLayout
@@ -22,9 +24,10 @@
             <View
                 android:id="@+id/draw_selected"
                 android:layout_width="36dp"
+
                 android:layout_height="4dp"
-                android:background="@color/accent"
-                android:layout_centerHorizontal="true"/>
+                android:layout_centerHorizontal="true"
+                android:background="@color/accent" />
 
             <ImageButton
                 android:id="@+id/draw"
@@ -45,9 +48,9 @@
                 android:id="@+id/erase_selected"
                 android:layout_width="36dp"
                 android:layout_height="4dp"
+                android:layout_centerHorizontal="true"
                 android:alpha="0"
-                android:background="@color/accent"
-                android:layout_centerHorizontal="true"/>
+                android:background="@color/accent" />
 
             <ImageButton
                 android:id="@+id/erase"
