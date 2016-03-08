@@ -7,24 +7,29 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
+import java.io.IOException;
 
 import erm.udraw.R;
+import erm.udraw.objects.CapturePhotoUtils;
 import erm.udraw.objects.Utils;
 
 public class HomeActivity extends BaseActivity {
+
+    public static final String PNG = ".png";
+    public static final String U_DRAW = "uDraw";
 
     Context mContext;
 
@@ -42,7 +47,7 @@ public class HomeActivity extends BaseActivity {
 
     }
 
-    private void setUpObjects(){
+    private void setUpObjects() {
         this.mContext = this;
     }
 
@@ -58,14 +63,59 @@ public class HomeActivity extends BaseActivity {
         return true;
     }
 
+    private String getFullPathOfUDrawFiles() {
+        //return Environment.getExternalStorageDirectory().getAbsolutePath().toString() + "/" + U_DRAW + "/";
+        String state = Environment.getExternalStorageState();
+        String path;
+        if (Environment.MEDIA_MOUNTED.equals(state)){
+            //SD card available
+            path = Environment.getExternalStorageDirectory().getPath().toString();
+        } else {
+            path = getFilesDir().getPath().toString();
+        }
 
-    private void takeScreenshot() {
-        Date now = new Date();
-        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+        return path + "/" + U_DRAW + "/";
+    }
 
+    private String getTimeDateFileName() {
+        return Utils.getCurrentDateTime() + PNG;
+    }
+
+    private boolean saveBitmapToFile(File file, Bitmap bitmap) {
+
+        FileOutputStream out = null;
         try {
-            // image naming and path  to include sd card  appending name you choose for file
-            String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+            if (!file.exists()) {
+                if(!file.getParentFile().exists()){
+                    file.getParentFile().mkdirs();
+                }
+
+                file.createNewFile();
+            }
+            out = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (Exception e) {
+            log(e.getMessage());
+            errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                log(e.getMessage());
+                errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
+            }
+        }
+
+        return !bErrorPopupOpen;
+    }
+
+    private void screenshotThenShare() {
+        try {
+            //we're just going to automatically save it
+            String mPath = getFullPathOfUDrawFiles() + getTimeDateFileName();
 
             // create bitmap screen capture
             View v1 = getWindow().getDecorView().getRootView();
@@ -75,70 +125,90 @@ public class HomeActivity extends BaseActivity {
 
             File imageFile = new File(mPath);
 
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            int quality = 100;
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            shareScreenshot(imageFile);
+            if(saveBitmapToFile(imageFile, bitmap))
+                shareImageFile(imageFile);
         } catch (Throwable e) {
-            // Several error may come out with file handling or OOM
-            e.printStackTrace();
+            log(e.getMessage());
+            errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
         }
     }
 
-    private void shareScreenshot(File imageFile) {
+    private void shareImageFile(File imageFile) {
         Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
         shareIntent.setType("image/*");
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
-        log(imageFile.getAbsolutePath().toString());
-        startActivity(Intent.createChooser(shareIntent, "share"));
+        log("Saving image to: " + imageFile.getAbsolutePath().toString());
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_image)));
     }
+
 
     private void shareImage() {
-        //TODO:Save image, then share the image?
-        //TODO: (option 2) screenshot?
-        takeScreenshot();
+        screenshotThenShare();
     }
 
-    private void saveFile(){
+    private Bitmap getBitmapFromCanvas() {
+        //TODO:Get bitmap from fragment
+        return null;
+    }
 
-        final RelativeLayout dialogView = (RelativeLayout)LayoutInflater.from(this).inflate(R.layout.dialog_image_name,null);
+    private void saveFile() {
+
+        final RelativeLayout dialogView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_image_name, null);
         final EditText fileName = (EditText) dialogView.findViewById(R.id.file_name);
+        final TextInputLayout fileTIL = (TextInputLayout) dialogView.findViewById(R.id.file_name_til);
 
-        fileName.setText(Utils.getCurrentDateTime() + ".jpg");
+        fileName.setText(getTimeDateFileName());
+        fileName.selectAll();
 
-        new AlertDialog.Builder(this)
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .setTitle(getString(R.string.save_picture))
                 .setMessage(getString(R.string.give_picture_name))
-                .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
 
+        //Overriding the onClickListener so to have a simple check of name existence prior to saving
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button save = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+                save.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         if (Utils.isValidString(fileName.getText().toString())) {
-                            //TODO: save image
+                            Bitmap bitmap = getBitmapFromCanvas();
+
+                            if (bitmap != null) {
+                                String msg = CapturePhotoUtils.insertImage(getContentResolver(), bitmap, fileName.getText().toString(), "uDraw photo taken at " + getTimeDateFileName());
+                                log("CAPTURE PHOTO " + msg);
+
+                            } else {
+                                errorPopup(getString(R.string.no_bitmap), getString(R.string.could_not_get_bitmap), getString(R.string.ok));
+                            }
+
+                            alertDialog.dismiss();
                         } else {
-                            Toast.makeText(mContext,getString(R.string.failed_to_specify),Toast.LENGTH_LONG).show();
+                            fileTIL.setError(getString(R.string.must_specifiy));
                         }
                     }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .show();
+                });
+            }
+        });
+
+        alertDialog.show();
+
     }
 
-    private void newImage(){
+    private void newImage() {
         new AlertDialog.Builder(this)
 
                 .setTitle(getString(R.string.undo_all_changes))
                 .setMessage(getString(R.string.sure_undo))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO: Clear canvas
+                        //TODO: Clear canvas in fragment
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -157,17 +227,17 @@ public class HomeActivity extends BaseActivity {
         if (id == R.id.new_image) {
             newImage();
             return true;
-        } else if(id==R.id.save_image){
+        } else if (id == R.id.save_image) {
             saveFile();
             return true;
-        } else if(id==R.id.share_image){
+        } else if (id == R.id.share_image) {
             shareImage();
             return true;
-        } else if(id==R.id.import_image){
+        } else if (id == R.id.import_image) {
             //TODO:
             //"From... Gallery or New Picture"
             return true;
-        } else if(id==R.id.about){
+        } else if (id == R.id.about) {
             //TODO:
             //New activity showing
             //Version number, last updated, name, github link
@@ -178,8 +248,9 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
-    public void onBackPressed(){
-       //
+    public void onBackPressed() {
+        //
     }
+
 
 }

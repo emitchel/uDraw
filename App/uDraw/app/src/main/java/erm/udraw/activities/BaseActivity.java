@@ -1,9 +1,16 @@
 package erm.udraw.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
+
+import erm.udraw.R;
 
 /**
  * Created by ellio on 3/6/2016.
@@ -11,6 +18,8 @@ import android.util.Log;
  * Base class to inherit common functionality
  */
 public abstract class BaseActivity extends AppCompatActivity {
+    public boolean bErrorPopupOpen;
+
     public abstract String getTag();
 
     /**
@@ -23,14 +32,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (extras != null)
             intent.putExtras(extras);
 
-        if (enterAnim <=0)
+        if (enterAnim <= 0)
             enterAnim = android.R.anim.fade_in;
 
-        if(exitAnim <=0)
+        if (exitAnim <= 0)
             exitAnim = android.R.anim.fade_out;
 
         startActivity(intent);
-        overridePendingTransition(enterAnim,exitAnim);
+        overridePendingTransition(enterAnim, exitAnim);
     }
 
     public void log(String msg) {
@@ -45,6 +54,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         log(getTag() + " was created");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow(); // in Activity's onCreate() for instance
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
 
     }
 
@@ -64,5 +78,20 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         log(getTag() + " was stopped");
+    }
+
+    public void errorPopup(String title, String message, String buttonText) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setIcon(R.drawable.ic_error_black_36dp)
+                .setMessage(message)
+                .setPositiveButton(buttonText, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        bErrorPopupOpen = false;
+                        //do nothing
+                    }
+                })
+                .show();
+        bErrorPopupOpen = true;
     }
 }
