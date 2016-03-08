@@ -22,19 +22,29 @@ import erm.udraw.objects.Utils;
  */
 public class CanvasView extends View implements View.OnTouchListener {
     private static float DEFAULT_STROKE_WIDTH = 12f;
+    private static final float TOLERANCE = 5;
 
     private Bitmap mBitmap;
     Canvas mCanvas;
     Color mCurrentColor, mOldColor;
     float mCurrentSize;
+    boolean mEraseMode;
 
     Stack<Stroke> mStrokes = new Stack<Stroke>();
     Stack<Stroke> mUndoneStrokes = new Stack<Stroke>();
     Map mHistory = new HashMap();
 
     private float mX, mY;
-    private static final float TOLERANCE = 5;
 
+    CanvasTouchListener mListener;
+
+    public interface CanvasTouchListener{
+        public void onTouch();
+    }
+
+    public void setListener(CanvasTouchListener listener){
+        this.mListener = listener;
+    }
 
     public CanvasView(Context context) {
         super(context);
@@ -67,6 +77,7 @@ public class CanvasView extends View implements View.OnTouchListener {
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(mCurrentColor.hex);
         paint.setStrokeWidth(mCurrentSize);
+        paint.setStrokeCap(Paint.Cap.ROUND);
 
         return paint;
     }
@@ -78,13 +89,6 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     public enum History {
         FORWARD, BACKWARD
-    }
-
-    /**
-     * Actions describing the history of a path
-     */
-    public enum Action {
-        ADD, REMOVE
     }
 
     /**
@@ -146,9 +150,10 @@ public class CanvasView extends View implements View.OnTouchListener {
         this.mCurrentSize = newStroke;
     }
 
-    private void addHistory(Path path, Action action) {
-        mHistory.put(path, action);
+    public float getCurrentWidth(){
+        return this.mCurrentSize;
     }
+
 
 
     /**
@@ -157,11 +162,13 @@ public class CanvasView extends View implements View.OnTouchListener {
     public void setEraserMode() {
         mOldColor = mCurrentColor;
         mCurrentColor = Color.WHITE;
+        mEraseMode = true;
 
     }
 
     public void setPenMode() {
         mCurrentColor = mOldColor;
+        mEraseMode = false;
     }
 
 
@@ -234,13 +241,12 @@ public class CanvasView extends View implements View.OnTouchListener {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        final int action = event.getActionMasked();
-        final int pointerCount = event.getPointerCount();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 startTouch((int) x, (int) y);
-
+                if(mListener!=null)
+                    mListener.onTouch();
                 break;
             case MotionEvent.ACTION_MOVE:
                 pointMove(x, y);

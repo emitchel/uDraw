@@ -6,14 +6,15 @@
         android:id="@+id/new_image"
         android:orderInCategory="100"
         android:title="@string/new_image"
-        android:icon="@drawable/ic_restore_page_white_36dp"
+        android:icon="@drawable/ic_delete_white_36dp"
         app:showAsAction="always" />
     <item
-        android:id="@+id/save_image"
+        android:id="@+id/import_image"
         android:orderInCategory="100"
-        android:title="@string/save_image"
-        android:icon="@drawable/ic_save_white_36dp"
+        android:title="@string/import_image"
+        android:icon="@drawable/ic_add_a_photo_white_36dp"
         app:showAsAction="always" />
+
     <item
         android:id="@+id/share_image"
         android:orderInCategory="100"
@@ -22,11 +23,11 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/import_image"
+        android:id="@+id/save_image"
         android:orderInCategory="100"
-        android:title="@string/import_image"
-        android:icon="@drawable/ic_input_white_36dp"
-        app:showAsAction="ifRoom" />
+        android:title="@string/save_image"
+        android:icon="@drawable/ic_save_white_36dp"
+        app:showAsAction="always" />
 
 
     <item

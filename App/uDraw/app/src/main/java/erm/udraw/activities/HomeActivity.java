@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -121,7 +122,7 @@ public class HomeActivity extends BaseActivity {
 
             /**
              * I could easily just get the Bitmap of the canvas but
-             * requirements specified a screen shot, so thats what this is
+             * requirements specified a screen shot, so that's what this is
              */
             View v1 = getWindow().getDecorView().getRootView();
             v1.setDrawingCacheEnabled(true);
@@ -143,7 +144,7 @@ public class HomeActivity extends BaseActivity {
         shareIntent.setType("image/*");
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
         log("Saving image to: " + imageFile.getAbsolutePath().toString());
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_image)));
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_screenshot)));
     }
 
 
@@ -191,7 +192,8 @@ public class HomeActivity extends BaseActivity {
 
                             if (bitmap != null) {
                                 String msg = CapturePhotoUtils.insertImage(getContentResolver(), bitmap, fileName.getText().toString(), "uDraw photo taken at " + getTimeDateFileName());
-                                log("CAPTURE PHOTO " + msg);
+                                log("Photo to gallery" + msg);
+                                Toast.makeText(mContext,getString(R.string.image_saved_successfully),Toast.LENGTH_LONG).show();
 
                             } else {
                                 errorPopup(getString(R.string.no_bitmap), getString(R.string.could_not_get_bitmap), getString(R.string.ok));

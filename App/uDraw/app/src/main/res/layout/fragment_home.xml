@@ -7,10 +7,51 @@
 
     tools:showIn="@layout/activity_home">
 
+
+    <RelativeLayout
+        android:id="@+id/line_width_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_alignLeft="@+id/action_wrapper"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/action_wrapper"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/round_top_left_right_corners"
+        android:elevation="10dp">
+
+        <ImageView
+            android:id="@+id/line_width_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding_half"
+            android:src="@drawable/ic_line_weight_black_36dp" />
+
+        <TextView
+            android:id="@+id/line_width_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/line_width_image"
+            android:text="100"
+            android:textColor="@color/black" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/line_width_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/line_width_value"
+            android:max="100"></android.support.v7.widget.AppCompatSeekBar>
+
+    </RelativeLayout>
+
     <LinearLayout
-        android:id="@+id/action_wrapper"
+        android:id="@id/action_wrapper"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="68dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/round_top_left_right_corners"
@@ -97,3 +138,4 @@
 
 
 </RelativeLayout>
+

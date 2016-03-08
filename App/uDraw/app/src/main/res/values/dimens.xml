@@ -4,5 +4,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="default_padding">16dp</dimen>
+    <dimen name="default_padding_half">8dp</dimen>
+    <dimen name="default_padding_quarter">4dp</dimen>
     <dimen name="text_large">65sp</dimen>
+    <dimen name="bar_height">68dp</dimen>
 </resources>

@@ -13,12 +13,14 @@
     <string name="take_picture">Take Picture</string>
     <string name="save_image">Save Image</string>
     <string name="share_image">Share Image</string>
+    <string name="share_screenshot">Share Screenshot</string>
     <string name="about">About</string>
 
     <string name="undo_all_changes">New Page</string>
     <string name="sure_undo">Are you sure you want to erase your masterpiece?</string>
 
     <string name="save_picture">Save your image</string>
+    <string name="image_saved_successfully">Image saved successfully</string>
     <string name="give_picture_name">Give your picture a name</string>
     <string name="file_name">Specify file name</string>
     <string name="failed_to_specify">Failed to specify file name</string>
@@ -26,6 +28,7 @@
     <string name="no_bitmap">No Bitmap Provided</string>
     <string name="could_not_get_bitmap">Was not able to obtain bitmap from canvas</string>
     <string name="share_your_image">Share your image</string>
+
 
     <string name="oops">Oops!</string>
     <string name="error_saving_image">An error occurred while saving your image</string>
