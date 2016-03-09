@@ -27,7 +27,6 @@ import erm.udraw.views.CanvasView;
 
 /**
  * A placeholder fragment containing a simple view.
- *
  */
 public class HomeFragment extends BaseFragment {
     public static final int SPACE_TO_COVER_RADIUS = 6;
@@ -36,7 +35,7 @@ public class HomeFragment extends BaseFragment {
     LinearLayout mActionWrapper;
     int mActionWrapperHeight = 0;
 
-    boolean mColorAnimationBusy,mWidthAnimationBusy;
+    boolean mColorAnimationBusy, mWidthAnimationBusy;
 
     RelativeLayout mLineWidthArea;
     boolean mWidthAreaShowing;
@@ -120,7 +119,7 @@ public class HomeFragment extends BaseFragment {
             log("Height of action_wrapper: " + String.valueOf(mActionWrapperHeight));
 
             mLineWidthArea.animate()
-                    .translationYBy((mWidthAreaShowing ? 1 : -1) * mActionWrapperHeight + (mWidthAreaShowing ? -SPACE_TO_COVER_RADIUS  : SPACE_TO_COVER_RADIUS ))
+                    .translationYBy((mWidthAreaShowing ? 1 : -1) * mActionWrapperHeight + (mWidthAreaShowing ? -SPACE_TO_COVER_RADIUS : SPACE_TO_COVER_RADIUS))
                     .setInterpolator(new DecelerateInterpolator())
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -145,7 +144,7 @@ public class HomeFragment extends BaseFragment {
             log("Height of action_wrapper: " + String.valueOf(mActionWrapperHeight));
 
             mColorArea.animate()
-                    .translationYBy((mColorAreaShowing ? 1 : -1) * mActionWrapperHeight + (mColorAreaShowing ? -SPACE_TO_COVER_RADIUS : SPACE_TO_COVER_RADIUS ))
+                    .translationYBy((mColorAreaShowing ? 1 : -1) * mActionWrapperHeight + (mColorAreaShowing ? -SPACE_TO_COVER_RADIUS : SPACE_TO_COVER_RADIUS))
                     .setInterpolator(new DecelerateInterpolator())
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -159,14 +158,18 @@ public class HomeFragment extends BaseFragment {
         }
     }
 
-    private void setColor(CanvasView.Color color){
+    private void setColor(CanvasView.Color color) {
         mCanvas.setColor(color);
 
-        GradientDrawable background = (GradientDrawable)mColorSelected.getBackground();
+        GradientDrawable background = (GradientDrawable) mColorSelected.getBackground();
         background.setColor(color.hex);
 
-        if(mColorAreaShowing)
+        if (mColorAreaShowing)
             showOrHideColorSelector();
+
+        //Set to pen mode after selecting color
+        mCanvas.setPenMode();
+        fadeInFadeOut(mDrawSelected, mEraseSelected);
 
     }
 
@@ -180,11 +183,11 @@ public class HomeFragment extends BaseFragment {
         ArrayList<CanvasView.Color> colorsAvailable = mCanvas.getAvailableColors();
         //Adding available colors to horizontal scroll
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        for(final CanvasView.Color color : colorsAvailable){
+        for (final CanvasView.Color color : colorsAvailable) {
 
 
-            View colorView = inflater.inflate(R.layout.color_view,null);
-            GradientDrawable bg = (GradientDrawable)colorView.findViewById(R.id.circle).getBackground();
+            View colorView = inflater.inflate(R.layout.color_view, null);
+            GradientDrawable bg = (GradientDrawable) colorView.findViewById(R.id.circle).getBackground();
             bg.setColor(color.hex);
             colorView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -223,7 +226,7 @@ public class HomeFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 fadeInFadeOut(mEraseSelected, mDrawSelected);
-                if(!mWidthAreaShowing)
+                if (!mWidthAreaShowing)
                     showOrHideLineWidth();
                 mCanvas.setEraserMode();
             }
@@ -285,11 +288,12 @@ public class HomeFragment extends BaseFragment {
     }
 
 
-    public void setBitmapBackground(Bitmap bitmap){
-        if(bitmap!=null) {
+    public void setBitmapBackground(Bitmap bitmap) {
+        if (bitmap != null) {
             mCanvas.setBitmapBackground(bitmap);
         }
     }
+
     public Bitmap getBitmap() {
         return mCanvas.getBitmap();
     }
@@ -298,11 +302,11 @@ public class HomeFragment extends BaseFragment {
         mCanvas.clearCanvas();
     }
 
-    public void rotateBackground(){
+    public void rotateBackground() {
         mCanvas.rotateClockwise();
     }
 
-    public void playBack(){
+    public void playBack() {
         mPlayback.setVisibility(View.VISIBLE);
         mPlayback.animate().alpha(.5f).setDuration(Constants.SHORT_DURATION).setListener(null);
 
@@ -320,6 +324,23 @@ public class HomeFragment extends BaseFragment {
         });
     }
 
+    /**
+     * Usability feature to close any open windows.
+     * @return
+     */
+    public boolean closeWidthOrColorPicker() {
+        if (mWidthAreaShowing) {
+            showOrHideLineWidth();
+            return true;
+        }
+
+        if (mColorAreaShowing) {
+            showOrHideColorSelector();
+            return true;
+        }
+
+        return false;
+    }
 
 }
 

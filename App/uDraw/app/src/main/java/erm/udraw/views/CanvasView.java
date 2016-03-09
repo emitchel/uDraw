@@ -384,9 +384,9 @@ public class CanvasView extends View implements View.OnTouchListener {
         }
     }
 
+
     public Bitmap getBitmap() {
         return Utils.getBitmapFromView(this);
-
     }
 
 

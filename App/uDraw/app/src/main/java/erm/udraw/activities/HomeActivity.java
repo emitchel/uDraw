@@ -553,7 +553,7 @@ public class HomeActivity extends BaseActivity {
         int id = item.getItemId();
 
 
-        if (id == R.id.new_image) {
+        if (id==R.id.clear) {
             newImage();
             return true;
         } else if (id == R.id.save_image) {
@@ -582,7 +582,13 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        //
+        HomeFragment frag = getFragment();
+
+        /**
+         * Usability feature to close any open windows if they're open.
+         */
+        if(!frag.closeWidthOrColorPicker())
+            moveTaskToBack(true);
     }
 
 
