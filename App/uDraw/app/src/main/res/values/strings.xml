@@ -31,6 +31,8 @@
     <string name="file_name">Specify file name</string>
     <string name="failed_to_specify">Failed to specify file name</string>
     <string name="must_specifiy">Must specify file name</string>
+    <string name="are_you_sure">Are you sure you want to exit?</string>
+    <string name="exit">Exit</string>
     <string name="no_bitmap">No Bitmap Provided</string>
     <string name="could_not_get_bitmap">Was not able to obtain bitmap from canvas</string>
     <string name="share_your_image">Share your image</string>
@@ -48,6 +50,7 @@
     <string name="unable_to_store">Unable to store image on this device</string>
     <string name="save">Save</string>
 
+    <string name="confirm">Confirm</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 

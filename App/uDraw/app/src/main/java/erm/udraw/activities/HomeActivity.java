@@ -587,8 +587,25 @@ public class HomeActivity extends BaseActivity {
         /**
          * Usability feature to close any open windows if they're open.
          */
-        if(!frag.closeWidthOrColorPicker())
-            moveTaskToBack(true);
+
+        if(!frag.closeWidthOrColorPicker()){
+            new AlertDialog.Builder(this)
+
+                    .setTitle(getString(R.string.exit))
+                    .setMessage(getString(R.string.are_you_sure))
+                    .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            moveTaskToBack(true);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    })
+                    .show();
+        }
+
     }
 
 
