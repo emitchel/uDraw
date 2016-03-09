@@ -1,10 +1,14 @@
 package erm.udraw.activities;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -12,7 +16,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -37,14 +43,25 @@ import erm.udraw.objects.Utils;
 
 /**
  * Main Activity holing one fragment for drawing.
- *
+ * <p/>
  * Main features are methods bubbled down to CanvasView level
  */
 public class HomeActivity extends BaseActivity {
 
 
-    private static final int REQUEST_CODE_PICTURE= 1;
+    private static final int REQUEST_CODE_PICTURE = 1;
     private static final int SELECT_PHOTO = 100;
+    public static final int TAKE_PHOTO = 0;
+    public static final int CHOOSE_EXISTING = 1;
+    public static final int NEW_PHOTO = 2;
+    public static final int SHARE_PHOTO = 3;
+    public static final int SAVE_PHOTO = 4;
+
+    /**
+     * Vars
+     */
+    private Uri mUriPhoto;
+    private String mNewFileName;
 
     public static final String PNG = ".png";
     public static final String U_DRAW = "uDraw";
@@ -83,20 +100,21 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * Determines best location for storing draw files
+     *
      * @return
      */
     private String getFullPathOfUDrawFiles() {
 
         String state = Environment.getExternalStorageState();
         String path;
-        if (Environment.MEDIA_MOUNTED.equals(state)){
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
             //SD card available
             path = Environment.getExternalStorageDirectory().getPath().toString();
         } else {
             path = getFilesDir().getPath().toString();
         }
 
-        return path + "/" + U_DRAW + "/";
+        return path + File.separator + U_DRAW;
     }
 
     private String getTimeDateFileName() {
@@ -106,6 +124,7 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * Simple save to file system given file and bitmap
+     *
      * @param file
      * @param bitmap
      * @return
@@ -115,15 +134,17 @@ public class HomeActivity extends BaseActivity {
         FileOutputStream out = null;
         try {
             if (!file.exists()) {
-                if(!file.getParentFile().exists()){
-                    file.getParentFile().mkdirs();
+                if (!file.getParentFile().exists()) {
+                    if (!file.getParentFile().mkdirs()) {
+                        errorPopup(getString(R.string.oops), getString(R.string.unable_to_store), getString(R.string.ok));
+                        return false;
+                    }
                 }
 
                 file.createNewFile();
             }
             out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-            // PNG is a lossless format, the compression factor (100) is ignored
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         } catch (Exception e) {
             log(e.getMessage());
             errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
@@ -143,35 +164,19 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * This method was strictly made to hit the requirement of
-     * "SCREEN SHOTTING" and then sharing - would probably rather
+     * "SCREENSHOTTING" and then sharing - would probably rather
      * just share a picture of the canvas, and not the UI controls
      */
     private void screenshotThenShare() {
-        try {
+        ActivityCompat.requestPermissions(HomeActivity.this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                SHARE_PHOTO);
 
-            String mPath = getFullPathOfUDrawFiles() + getTimeDateFileName();
-
-            /**
-             * I could easily just get the Bitmap of the canvas but
-             * requirements specified a screen shot, so that's what this is
-             */
-            View v1 = getWindow().getDecorView().getRootView();
-            v1.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
-            v1.setDrawingCacheEnabled(false);
-
-            File imageFile = new File(mPath);
-
-            if(saveBitmapToFile(imageFile, bitmap))
-                shareImageFile(imageFile);
-        } catch (Throwable e) {
-            log(e.getMessage());
-            errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
-        }
     }
 
     /**
      * Brings up apps that can share a given image
+     *
      * @param imageFile
      */
     private void shareImageFile(File imageFile) {
@@ -189,7 +194,7 @@ public class HomeActivity extends BaseActivity {
 
     private Bitmap getBitmapFromCanvas() {
         HomeFragment frag = getFragment();
-        if(frag!=null){
+        if (frag != null) {
             return frag.getBitmap();
         } else {
             return null;
@@ -226,19 +231,12 @@ public class HomeActivity extends BaseActivity {
                     @Override
                     public void onClick(View v) {
                         if (Utils.isValidString(fileName.getText().toString())) {
-                            Bitmap bitmap = getBitmapFromCanvas();
+                            mNewFileName = fileName.getText().toString();
+                            //Gotta ask for these permissions now
+                            ActivityCompat.requestPermissions(HomeActivity.this,
+                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    SAVE_PHOTO);
 
-                            if (bitmap != null) {
-                                /**
-                                 * Nice method to set image in phone's native gallery
-                                 */
-                                String msg = CapturePhotoUtils.insertImage(getContentResolver(), bitmap, fileName.getText().toString(), "uDraw photo taken at " + getTimeDateFileName());
-                                log("Photo to gallery" + msg);
-                                Toast.makeText(mContext,getString(R.string.image_saved_successfully),Toast.LENGTH_LONG).show();
-
-                            } else {
-                                errorPopup(getString(R.string.no_bitmap), getString(R.string.could_not_get_bitmap), getString(R.string.ok));
-                            }
 
                             alertDialog.dismiss();
                         } else {
@@ -281,40 +279,169 @@ public class HomeActivity extends BaseActivity {
     /**
      * Feature to play back the drawn picture.
      */
-    private void playBack(){
+    private void playBack() {
         HomeFragment frag = getFragment();
         frag.playBack();
     }
 
     /**
      * Will show "Choose or Take picture" for the user to draw on
-     *
-     *
      */
-    private void pickOrTakePicture(){
-        PackageManager pm = getPackageManager();
+    private void pickOrTakePicture() {
 
-        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            Intent pickIntent = new Intent();
-            pickIntent.setType("image/*");
-            pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            String pickTitle = getString(R.string.take_or_select);
-            Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
-            startActivityForResult(chooserIntent, REQUEST_CODE_PICTURE);
-        } else {
-            Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-            photoPickerIntent.setType("image/*");
-            startActivityForResult(photoPickerIntent, SELECT_PHOTO);
-        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.take_or_select))
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.take_photo),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                //Gotta ask for these permissions now
+                                ActivityCompat.requestPermissions(HomeActivity.this,
+                                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        NEW_PHOTO);
+
+                            }
+                        })
+                .setNegativeButton(getString(R.string.choose_existing),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                                Intent intent = new Intent(
+                                        Intent.ACTION_PICK,
+                                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent,
+                                        CHOOSE_EXISTING);
+                            }
+                        })
+                .setNeutralButton(getString(R.string.cancel),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
 
     }
 
     /**
-     * Retrieves the bitmap of the chosen (or taken) photo
+     * For API >=23 we need to ask for permission when accessing storage, shouldn't effect prior APIs... which is nice
      *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case NEW_PHOTO: {
+                // If request is cancelled, the result arrays are empty.
+
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        String fileName = getTimeDateFileName()
+                                + ".jpg";
+                        ContentValues values = new ContentValues();
+                        values.put(
+                                MediaStore.Images.Media.TITLE,
+                                fileName);
+                        mUriPhoto =
+                                getContentResolver()
+                                        .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                                values);
+
+                        Intent intent = new Intent(
+                                MediaStore.ACTION_IMAGE_CAPTURE);
+                        intent.putExtra(
+                                MediaStore.EXTRA_OUTPUT,
+                                mUriPhoto);
+                        startActivityForResult(intent,
+                                TAKE_PHOTO);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(mContext,
+                                getString(R.string.no_camera),
+                                Toast.LENGTH_LONG).show();
+                    } catch (UnsupportedOperationException e2) {
+                        Toast.makeText(mContext, getString(R.string.no_sd_card),
+                                Toast.LENGTH_LONG).show();
+                    }
+
+
+                } else {
+
+                    Toast.makeText(this, getString(R.string.permission_denied), Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case SAVE_PHOTO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Bitmap bitmap = getBitmapFromCanvas();
+
+                    if (bitmap != null) {
+                        /**
+                         * Nice method to set image in phone's native gallery
+                         */
+                        String msg = CapturePhotoUtils.insertImage(getContentResolver(), bitmap, mNewFileName, "uDraw photo taken at " + getTimeDateFileName());
+                        log("Photo to gallery" + msg);
+                        if (msg != null)
+                            Toast.makeText(mContext, getString(R.string.image_saved_successfully), Toast.LENGTH_LONG).show();
+                        else
+                            errorPopup(getString(R.string.oops), getString(R.string.unable_to_store), getString(R.string.ok));
+
+                    } else {
+                        errorPopup(getString(R.string.no_bitmap), getString(R.string.could_not_get_bitmap), getString(R.string.ok));
+                    }
+                } else {
+
+                    Toast.makeText(this, getString(R.string.permission_denied), Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case SHARE_PHOTO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    try {
+
+                        String mPath = getFullPathOfUDrawFiles();
+
+                        /**
+                         * I could easily just get the Bitmap of the canvas but
+                         * requirements specified a screen shot, so that's what this is
+                         */
+                        View v1 = getWindow().getDecorView().getRootView();
+                        v1.setDrawingCacheEnabled(true);
+                        Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+                        v1.setDrawingCacheEnabled(false);
+
+                        File imageFile = new File(mPath, getTimeDateFileName());
+
+                        if (saveBitmapToFile(imageFile, bitmap))
+                            shareImageFile(imageFile);
+                    } catch (Throwable e) {
+                        log(e.getMessage());
+                        errorPopup(getString(R.string.oops), getString(R.string.error_saving_image), getString(R.string.ok));
+                    }
+                } else {
+                    Toast.makeText(this, getString(R.string.permission_denied), Toast.LENGTH_SHORT).show();
+                }
+
+                return;
+            }
+
+        }
+    }
+
+    /**
+     * Retrieves the bitmap of the chosen (or taken) photo
+     * <p/>
      * TODO: needs work on rotating if needed.
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -322,20 +449,53 @@ public class HomeActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_PICTURE && resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-                return;
+
+
+        String filePath = "";
+        if (requestCode == TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+            CursorLoader cursorLoader = new CursorLoader(mContext,
+                    mUriPhoto, filePathColumn, null, null, null);
+            Cursor cursor = cursorLoader.loadInBackground();
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            filePath = cursor.getString(columnIndex);
+            cursor.close();
+
+
+        } else if (requestCode == CHOOSE_EXISTING
+                && resultCode == Activity.RESULT_OK) {
+            Uri selectedImage = data.getData();
+            if (selectedImage.toString().contains("gallery3d")) {
+                Toast.makeText(mContext,
+                        getString(R.string.cloud_image),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                Cursor cursor = getContentResolver().query(
+                        selectedImage, filePathColumn, null, null, null);
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                filePath = cursor.getString(columnIndex);
+                cursor.close();
+
             }
+        }
+
+        if (Utils.isValidString(filePath)) {
             try {
-                InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                InputStream inputStream = getContentResolver().openInputStream(Uri.fromFile(new File(filePath)));
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                 HomeFragment frag = getFragment();
-                if(bitmap!=null) {
+                if (bitmap != null) {
 
                     frag.setBitmapBackground(bitmap);
                 } else {
-                    errorPopup(getString(R.string.oops),"Bitmap was not provided","Ok");
+                    errorPopup(getString(R.string.oops), getString(R.string.could_not_get_bitmap), getString(R.string.ok));
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -346,7 +506,7 @@ public class HomeActivity extends BaseActivity {
     /**
      * Will bubble down to view level.
      */
-    public void rotateBackground(){
+    public void rotateBackground() {
         HomeFragment fragment = getFragment();
         fragment.rotateBackground();
 
@@ -356,7 +516,7 @@ public class HomeActivity extends BaseActivity {
      * Simple popup to basically show the Splash page again
      * but could used to show more information
      */
-    public void showAbout(){
+    public void showAbout() {
         final RelativeLayout dialogView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
         final AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
@@ -372,11 +532,12 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * Quick method to retrieve the nested fragment
+     *
      * @return
      */
-    public HomeFragment getFragment(){
+    public HomeFragment getFragment() {
         FragmentManager fm = getSupportFragmentManager();
-        HomeFragment fragment = (HomeFragment)fm.findFragmentById(R.id.canvas_fragment);
+        HomeFragment fragment = (HomeFragment) fm.findFragmentById(R.id.canvas_fragment);
         return fragment;
     }
 
@@ -398,10 +559,10 @@ public class HomeActivity extends BaseActivity {
         } else if (id == R.id.import_image) {
             pickOrTakePicture();
             return true;
-        } else if(id == R.id.playback) {
+        } else if (id == R.id.playback) {
             playBack();
             return true;
-        } else if(id == R.id.rotate){
+        } else if (id == R.id.rotate) {
             rotateBackground();
             return true;
 
@@ -417,7 +578,6 @@ public class HomeActivity extends BaseActivity {
     public void onBackPressed() {
         //
     }
-
 
 
 }
