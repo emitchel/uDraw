@@ -4,6 +4,7 @@
     <string name="title_activity_splash">SplashActivity</string>
 
     <string name="dev_name">Elliot Mitchell</string>
+
     <string name="by_dev_name">by Elliot Mitchell</string>
 
     <!-- Menu Options -->
@@ -15,6 +16,7 @@
     <string name="share_image">Share Image</string>
     <string name="share_screenshot">Share Screenshot</string>
     <string name="about">About</string>
+    <string name="rotate">Rotate Background Image</string>
     <string name="playback">Playback Drawing</string>
 
     <string name="playing_back">Playing Back…</string>
@@ -31,11 +33,13 @@
     <string name="no_bitmap">No Bitmap Provided</string>
     <string name="could_not_get_bitmap">Was not able to obtain bitmap from canvas</string>
     <string name="share_your_image">Share your image</string>
-
+    <string name="take_or_select">"Take or select a photo"</string>
 
     <string name="oops">Oops!</string>
     <string name="error_saving_image">An error occurred while saving your image</string>
     <string name="save">Save</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+
+
 </resources>

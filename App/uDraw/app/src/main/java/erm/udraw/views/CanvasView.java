@@ -3,23 +3,26 @@ package erm.udraw.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 import erm.udraw.objects.Constants;
 import erm.udraw.objects.Utils;
 
 /**
+ * Custom class used to draw
+ *
  * Created by ellio on 3/7/2016.
  */
 public class CanvasView extends View implements View.OnTouchListener {
@@ -28,17 +31,14 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     final Handler handler = new Handler();
 
-    private Bitmap mBitmap;
-    Canvas mCanvas;
     Color mCurrentColor;
     float mCurrentSize;
     boolean mEraseMode;
     boolean mPlaybackMode;
 
-    Stack<Stroke> mStrokes = new Stack<Stroke>();
-    Stack<Stroke> mStrokesHolder = new Stack<Stroke>();
-    Stack<Stroke> mUndoneStrokes = new Stack<Stroke>();
-    Map mHistory = new HashMap();
+    Stack<Stroke> mStrokes = new Stack<>();
+    Stack<Stroke> mStrokesHolder = new Stack<>();
+    Stack<Stroke> mUndoneStrokes = new Stack<>();
 
     private float mX, mY;
 
@@ -46,10 +46,19 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     CanvasPlayBackListener mPlayBackListener;
 
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
+
+    /**
+     * Interface to bubble up play back state
+     */
     public interface CanvasPlayBackListener {
         public void onPlayBackFinished();
     }
 
+    /**
+     * Required to know when to hide UI controls
+     */
     public interface CanvasTouchListener {
         public void onTouch();
     }
@@ -84,14 +93,58 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     }
 
+    private void setBackgroundV16Plus(View view, Bitmap bitmap) {
+        view.setBackground(new BitmapDrawable(getResources(), bitmap));
+
+    }
+
+    private void setBackgroundV16Minus(View view, Bitmap bitmap) {
+        view.setBackgroundDrawable(new BitmapDrawable(bitmap));
+    }
+
+    public void setBitmapBackground(Bitmap bitmap) {
+        if (bitmap != null) {
+            Matrix m = new Matrix();
+            m.setRectToRect(new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight()), new RectF(0, 0, this.getWidth(), this.getHeight()), Matrix.ScaleToFit.CENTER);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+            if (android.os.Build.VERSION.SDK_INT >= 16) {
+                setBackgroundV16Plus(this, bitmap);
+            } else {
+                setBackgroundV16Minus(this, bitmap);
+            }
+        }
+    }
+
+    /**
+     * Method for user to rotate the background image clockwise
+     */
+    public void rotateClockwise(){
+        mStrokesHolder.clear();
+        mStrokesHolder.addAll(mStrokes);
+        mStrokes.clear();
+        invalidate();
+        Bitmap bitmap = Utils.getBitmapFromView(this);
+        bitmap = Utils.rotateImage(bitmap,90);
+        setBitmapBackground(bitmap);
+        mStrokes.addAll(mStrokesHolder);
+        mStrokesHolder.clear();
+        invalidate();
+    }
+
+    /**
+     * Return a new Patin object based on state
+     * @return
+     */
     private Paint getNewPaint() {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
 
-        if(mEraseMode)
+        if (mEraseMode) {
             paint.setColor(Color.WHITE.hex);
-        else
+        } else {
             paint.setColor(mCurrentColor.hex);
+
+        }
 
         paint.setStrokeWidth(mCurrentSize);
         paint.setStrokeCap(Paint.Cap.ROUND);
@@ -137,6 +190,11 @@ public class CanvasView extends View implements View.OnTouchListener {
         return Color.getArrayListOfAvailableColors();
     }
 
+
+    /**
+     * Handles Undo, Redo methods
+     * @param direction
+     */
     public void goHistory(History direction) {
         if (!mPlaybackMode) {
             if (direction == History.FORWARD) {
@@ -158,9 +216,7 @@ public class CanvasView extends View implements View.OnTouchListener {
 
 
     public void setColor(Color newColor) {
-        if (!mEraseMode) {
-            this.mCurrentColor = newColor;
-        }
+        this.mCurrentColor = newColor;
     }
 
     public void setStrokeWidth(float newStroke) {
@@ -191,9 +247,9 @@ public class CanvasView extends View implements View.OnTouchListener {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
+
     }
 
     // override onDraw
@@ -243,9 +299,17 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     }
 
+    private void touchUp() {
+        Stroke stroke = mStrokes.peek();
+        if (stroke != null) {
+            mCanvas.drawPath(stroke.getPath(),stroke.getPaint());
+        }
+    }
+
     public void clearCanvas() {
         mStrokes.clear();
         mUndoneStrokes.clear();
+        setBackgroundColor(android.graphics.Color.WHITE);
         invalidate();
     }
 
@@ -310,7 +374,7 @@ public class CanvasView extends View implements View.OnTouchListener {
 
                     break;
                 case MotionEvent.ACTION_UP:
-
+                    touchUp();
                     break;
             }
             invalidate();
@@ -326,8 +390,11 @@ public class CanvasView extends View implements View.OnTouchListener {
     }
 
 
-    // _Name meaning inner class attribute
+    /**
+     * Simple container class to manage strokes over time
+     */
     public class Stroke {
+        // _Name meaning inner class attribute
         private Path _path;
         private Paint _paint;
 

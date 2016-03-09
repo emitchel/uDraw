@@ -4,7 +4,7 @@
 
 
     <solid
-        android:color="@color/primary_light" >
+        android:color="@color/primary_lighter" >
     </solid>
     <corners
         android:topLeftRadius="2dp"

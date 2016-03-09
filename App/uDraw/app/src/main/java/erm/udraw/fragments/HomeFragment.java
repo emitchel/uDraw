@@ -27,6 +27,7 @@ import erm.udraw.views.CanvasView;
 
 /**
  * A placeholder fragment containing a simple view.
+ *
  */
 public class HomeFragment extends BaseFragment {
     public static final int SPACE_TO_COVER_RADIUS = 6;
@@ -161,16 +162,17 @@ public class HomeFragment extends BaseFragment {
     private void setColor(CanvasView.Color color){
         mCanvas.setColor(color);
 
-
         GradientDrawable background = (GradientDrawable)mColorSelected.getBackground();
         background.setColor(color.hex);
-
 
         if(mColorAreaShowing)
             showOrHideColorSelector();
 
     }
 
+    /**
+     * Important step to generate the possible colors the user can choose
+     */
     private void setUpPage() {
         mLineWidthValue.setText(String.valueOf((int) mCanvas.getCurrentWidth()));
         mWidthSeekBar.setProgress((int) mCanvas.getCurrentWidth());
@@ -241,6 +243,9 @@ public class HomeFragment extends BaseFragment {
             }
         });
 
+        /**
+         * Using this to obtain the actual height of the paint control
+         */
         mActionWrapper.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -279,12 +284,22 @@ public class HomeFragment extends BaseFragment {
         });
     }
 
+
+    public void setBitmapBackground(Bitmap bitmap){
+        if(bitmap!=null) {
+            mCanvas.setBitmapBackground(bitmap);
+        }
+    }
     public Bitmap getBitmap() {
         return mCanvas.getBitmap();
     }
 
     public void clearCanvas() {
         mCanvas.clearCanvas();
+    }
+
+    public void rotateBackground(){
+        mCanvas.rotateClockwise();
     }
 
     public void playBack(){

@@ -1,0 +1,7 @@
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/primary_light"> <!-- ripple color -->
+
+    <item 	android:drawable="@color/primary_lighter"
+        	android:alpha=".1"/> <!-- normal color -->
+
+</ripple>
