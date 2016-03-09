@@ -49,8 +49,9 @@ import erm.udraw.objects.Utils;
 public class HomeActivity extends BaseActivity {
 
 
-    private static final int REQUEST_CODE_PICTURE = 1;
-    private static final int SELECT_PHOTO = 100;
+    /**
+     * Constants for listeners
+     */
     public static final int TAKE_PHOTO = 0;
     public static final int CHOOSE_EXISTING = 1;
     public static final int NEW_PHOTO = 2;
@@ -58,11 +59,16 @@ public class HomeActivity extends BaseActivity {
     public static final int SAVE_PHOTO = 4;
 
     /**
-     * Vars
+     * Vars shared across methods
+     *
      */
     private Uri mUriPhoto;
     private String mNewFileName;
 
+
+    /**
+     * Commonly used constants
+     */
     public static final String PNG = ".png";
     public static final String U_DRAW = "uDraw";
 
