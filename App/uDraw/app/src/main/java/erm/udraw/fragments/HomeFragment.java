@@ -3,6 +3,7 @@ package erm.udraw.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Bitmap;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatSeekBar;
@@ -11,11 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import erm.udraw.R;
 import erm.udraw.objects.Constants;
@@ -25,19 +29,25 @@ import erm.udraw.views.CanvasView;
  * A placeholder fragment containing a simple view.
  */
 public class HomeFragment extends BaseFragment {
+    public static final int SPACE_TO_COVER_RADIUS = 6;
     CanvasView mCanvas;
 
     LinearLayout mActionWrapper;
     int mActionWrapperHeight = 0;
 
-    boolean mAnimationBusy;
+    boolean mColorAnimationBusy,mWidthAnimationBusy;
 
     RelativeLayout mLineWidthArea;
     boolean mWidthAreaShowing;
     TextView mLineWidthValue;
 
     RelativeLayout mColorArea;
+    HorizontalScrollView mColorScroll;
     boolean mColorAreaShowing;
+    LinearLayout mColorSelections;
+    View mColorSelected;
+
+    TextView mPlayback;
 
     AppCompatSeekBar mWidthSeekBar;
     ImageButton mDraw, mErase, mChooseColor, mUndo, mRedo;
@@ -70,6 +80,12 @@ public class HomeFragment extends BaseFragment {
         mWidthSeekBar = (AppCompatSeekBar) view.findViewById(R.id.line_width_seekbar);
         mLineWidthValue = (TextView) view.findViewById(R.id.line_width_value);
 
+        mColorArea = (RelativeLayout) view.findViewById(R.id.color_wrapper);
+        mColorScroll = (HorizontalScrollView) view.findViewById(R.id.color_scroll);
+        mColorSelections = (LinearLayout) view.findViewById(R.id.color_selections);
+        mColorSelected = view.findViewById(R.id.color_choice);
+        mPlayback = (TextView) view.findViewById(R.id.playback);
+
         setCustomListeners();
         setUpPage();
 
@@ -93,24 +109,22 @@ public class HomeFragment extends BaseFragment {
 
 
     private void showOrHideLineWidth() {
-        if (!mAnimationBusy) {
-            if (mColorAreaShowing && !mWidthAreaShowing) {
-                //TODO:Close this area first
-                //Can happen concurrently
-                mColorAreaShowing = false;
-            }
+        if (mColorAreaShowing && !mWidthAreaShowing) {
 
-            mAnimationBusy = true;
+            showOrHideColorSelector();
+        }
+        if (!mWidthAnimationBusy) {
+            mWidthAnimationBusy = true;
 
             log("Height of action_wrapper: " + String.valueOf(mActionWrapperHeight));
 
             mLineWidthArea.animate()
-                    .translationYBy((mWidthAreaShowing ? 1 : -1) * mActionWrapperHeight + (mWidthAreaShowing ? -6 : 6))
+                    .translationYBy((mWidthAreaShowing ? 1 : -1) * mActionWrapperHeight + (mWidthAreaShowing ? -SPACE_TO_COVER_RADIUS  : SPACE_TO_COVER_RADIUS ))
                     .setInterpolator(new DecelerateInterpolator())
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            mAnimationBusy = false;
+                            mWidthAnimationBusy = false;
                             mWidthAreaShowing = !mWidthAreaShowing;
                         }
                     }).setDuration(Constants.SHORT_DURATION).start();
@@ -119,9 +133,65 @@ public class HomeFragment extends BaseFragment {
         }
     }
 
+    private void showOrHideColorSelector() {
+        if (mWidthAreaShowing && !mColorAreaShowing) {
+            showOrHideLineWidth();
+        }
+
+        if (!mColorAnimationBusy) {
+            mColorAnimationBusy = true;
+
+            log("Height of action_wrapper: " + String.valueOf(mActionWrapperHeight));
+
+            mColorArea.animate()
+                    .translationYBy((mColorAreaShowing ? 1 : -1) * mActionWrapperHeight + (mColorAreaShowing ? -SPACE_TO_COVER_RADIUS : SPACE_TO_COVER_RADIUS ))
+                    .setInterpolator(new DecelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mColorAnimationBusy = false;
+                            mColorAreaShowing = !mColorAreaShowing;
+                        }
+                    }).setDuration(Constants.SHORT_DURATION).start();
+
+
+        }
+    }
+
+    private void setColor(CanvasView.Color color){
+        mCanvas.setColor(color);
+
+
+        GradientDrawable background = (GradientDrawable)mColorSelected.getBackground();
+        background.setColor(color.hex);
+
+
+        if(mColorAreaShowing)
+            showOrHideColorSelector();
+
+    }
+
     private void setUpPage() {
         mLineWidthValue.setText(String.valueOf((int) mCanvas.getCurrentWidth()));
         mWidthSeekBar.setProgress((int) mCanvas.getCurrentWidth());
+
+        ArrayList<CanvasView.Color> colorsAvailable = mCanvas.getAvailableColors();
+        //Adding available colors to horizontal scroll
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        for(final CanvasView.Color color : colorsAvailable){
+
+
+            View colorView = inflater.inflate(R.layout.color_view,null);
+            GradientDrawable bg = (GradientDrawable)colorView.findViewById(R.id.circle).getBackground();
+            bg.setColor(color.hex);
+            colorView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setColor(color);
+                }
+            });
+            mColorSelections.addView(colorView);
+        }
     }
 
     private void setCustomListeners() {
@@ -131,10 +201,9 @@ public class HomeFragment extends BaseFragment {
                 if (mWidthAreaShowing)
                     showOrHideLineWidth();
 
-                if (mColorAreaShowing) {
-                    //TODO:
+                if (mColorAreaShowing)
+                    showOrHideColorSelector();
 
-                }
             }
         });
 
@@ -142,7 +211,8 @@ public class HomeFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 fadeInFadeOut(mDrawSelected, mEraseSelected);
-                showOrHideLineWidth();
+                if (!mWidthAreaShowing)
+                    showOrHideLineWidth();
                 mCanvas.setPenMode();
             }
         });
@@ -151,7 +221,8 @@ public class HomeFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 fadeInFadeOut(mEraseSelected, mDrawSelected);
-                showOrHideLineWidth();
+                if(!mWidthAreaShowing)
+                    showOrHideLineWidth();
                 mCanvas.setEraserMode();
             }
         });
@@ -182,6 +253,13 @@ public class HomeFragment extends BaseFragment {
             }
         });
 
+        mChooseColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showOrHideColorSelector();
+            }
+        });
+
         mWidthSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -207,6 +285,24 @@ public class HomeFragment extends BaseFragment {
 
     public void clearCanvas() {
         mCanvas.clearCanvas();
+    }
+
+    public void playBack(){
+        mPlayback.setVisibility(View.VISIBLE);
+        mPlayback.animate().alpha(.5f).setDuration(Constants.SHORT_DURATION).setListener(null);
+
+        mCanvas.playBack(new CanvasView.CanvasPlayBackListener() {
+            @Override
+            public void onPlayBackFinished() {
+                mPlayback.animate().alpha(0).setDuration(Constants.SHORT_DURATION).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mPlayback.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
     }
 
 

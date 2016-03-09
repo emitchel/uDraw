@@ -7,8 +7,8 @@
         android:color="@color/primary_light" >
     </solid>
     <corners
-        android:topLeftRadius="5dp"
-        android:topRightRadius="5dp"
+        android:topLeftRadius="2dp"
+        android:topRightRadius="2dp"
         >
     </corners>
 

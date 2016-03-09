@@ -8,16 +8,36 @@
     tools:showIn="@layout/activity_home">
 
 
+    
+
+    <erm.udraw.views.CanvasView
+        android:id="@+id/canvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/action_wrapper" />
+
+    <TextView
+        android:id="@+id/playback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/default_padding"
+        android:padding="@dimen/default_padding"
+        android:alpha="0"
+        android:background="@drawable/round_all_corners"
+        android:textColor="@color/icons"
+        android:text="@string/playing_back"
+        android:visibility="gone"
+        />
     <RelativeLayout
         android:id="@+id/line_width_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="@dimen/bar_height"
         android:layout_alignLeft="@+id/action_wrapper"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/action_wrapper"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/round_top_left_right_corners"
-        android:elevation="10dp">
+        android:background="@drawable/round_top_left_right_corners">
 
         <ImageView
             android:id="@+id/line_width_image"
@@ -43,15 +63,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/line_width_value"
-            android:max="100"></android.support.v7.widget.AppCompatSeekBar>
+            android:layout_toRightOf="@id/line_width_image"
+            android:max="100"
+            android:paddingLeft="@dimen/large_padding"></android.support.v7.widget.AppCompatSeekBar>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/color_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bar_height"
+        android:layout_alignLeft="@+id/action_wrapper"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/action_wrapper"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/round_top_left_right_corners">
+
+        <HorizontalScrollView
+            android:id="@+id/color_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/color_selections"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="@dimen/default_padding"></LinearLayout>
+        </HorizontalScrollView>
+
 
     </RelativeLayout>
 
     <LinearLayout
         android:id="@id/action_wrapper"
         android:layout_width="wrap_content"
-        android:layout_height="68dp"
+        android:layout_height="@dimen/bar_height"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/round_top_left_right_corners"
@@ -102,13 +150,27 @@
                 android:src="@drawable/ic_action_erase" />
         </RelativeLayout>
 
-        <ImageButton
-            android:id="@+id/color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/default_padding"
-            android:src="@drawable/ic_color_lens_black_36dp" />
+        <RelativeLayout
+            android:layout_width="68dp"
+            android:layout_height="68dp">
+
+            <ImageButton
+                android:id="@+id/color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/default_padding"
+                android:src="@drawable/ic_color_lens_black_36dp" />
+
+            <View
+                android:id="@+id/color_choice"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_margin="@dimen/default_padding_half"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/color_select" />
+        </RelativeLayout>
 
         <ImageButton
             android:id="@+id/undo"
@@ -129,12 +191,6 @@
             />
 
     </LinearLayout>
-
-    <erm.udraw.views.CanvasView
-        android:id="@+id/canvas"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/action_wrapper" />
 
 
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import erm.udraw.objects.Constants;
 import erm.udraw.objects.Utils;
 
 /**
@@ -24,13 +26,17 @@ public class CanvasView extends View implements View.OnTouchListener {
     private static float DEFAULT_STROKE_WIDTH = 12f;
     private static final float TOLERANCE = 5;
 
+    final Handler handler = new Handler();
+
     private Bitmap mBitmap;
     Canvas mCanvas;
-    Color mCurrentColor, mOldColor;
+    Color mCurrentColor;
     float mCurrentSize;
     boolean mEraseMode;
+    boolean mPlaybackMode;
 
     Stack<Stroke> mStrokes = new Stack<Stroke>();
+    Stack<Stroke> mStrokesHolder = new Stack<Stroke>();
     Stack<Stroke> mUndoneStrokes = new Stack<Stroke>();
     Map mHistory = new HashMap();
 
@@ -38,11 +44,17 @@ public class CanvasView extends View implements View.OnTouchListener {
 
     CanvasTouchListener mListener;
 
-    public interface CanvasTouchListener{
+    CanvasPlayBackListener mPlayBackListener;
+
+    public interface CanvasPlayBackListener {
+        public void onPlayBackFinished();
+    }
+
+    public interface CanvasTouchListener {
         public void onTouch();
     }
 
-    public void setListener(CanvasTouchListener listener){
+    public void setListener(CanvasTouchListener listener) {
         this.mListener = listener;
     }
 
@@ -67,7 +79,7 @@ public class CanvasView extends View implements View.OnTouchListener {
         setFocusable(true);
         setFocusableInTouchMode(true);
         this.setOnTouchListener(this);
-        mOldColor = mCurrentColor = Color.BLACK;
+        mCurrentColor = Color.BLACK;
         mCurrentSize = DEFAULT_STROKE_WIDTH;
 
     }
@@ -75,7 +87,12 @@ public class CanvasView extends View implements View.OnTouchListener {
     private Paint getNewPaint() {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(mCurrentColor.hex);
+
+        if(mEraseMode)
+            paint.setColor(Color.WHITE.hex);
+        else
+            paint.setColor(mCurrentColor.hex);
+
         paint.setStrokeWidth(mCurrentSize);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
@@ -98,10 +115,9 @@ public class CanvasView extends View implements View.OnTouchListener {
         BLACK(android.graphics.Color.BLACK), DARK_GRAY(android.graphics.Color.DKGRAY),
         LIGHT_GRAY(android.graphics.Color.LTGRAY), BLUE(android.graphics.Color.BLUE),
         RED(android.graphics.Color.RED), GREEN(android.graphics.Color.GREEN),
-        ORANGE(0xFFA500), YELLOW(android.graphics.Color.YELLOW), WHITE(android.graphics.Color.WHITE);
+        ORANGE(0xFFFFA500), YELLOW(android.graphics.Color.YELLOW), WHITE(android.graphics.Color.WHITE);
 
-
-        int hex;
+        public int hex;
 
         Color(int hexValue) {
             this.hex = hexValue;
@@ -115,59 +131,58 @@ public class CanvasView extends View implements View.OnTouchListener {
             }
             return arrayList;
         }
-        }
+    }
 
     public ArrayList<Color> getAvailableColors() {
         return Color.getArrayListOfAvailableColors();
     }
 
     public void goHistory(History direction) {
-        if (direction == History.FORWARD) {
-            //Redo
-            if (mUndoneStrokes.size() > 0) {
-                mStrokes.push(mUndoneStrokes.pop());
-                invalidate();
-            }
-        } else {
-            //Undo
-            if (mStrokes.size() > 0) {
-                mUndoneStrokes.push(mStrokes.pop());
-                invalidate();
-            }
+        if (!mPlaybackMode) {
+            if (direction == History.FORWARD) {
+                //Redo
+                if (mUndoneStrokes.size() > 0) {
+                    mStrokes.push(mUndoneStrokes.pop());
+                    invalidate();
+                }
+            } else {
+                //Undo
+                if (mStrokes.size() > 0) {
+                    mUndoneStrokes.push(mStrokes.pop());
+                    invalidate();
+                }
 
+            }
         }
     }
 
-    public Color getCurrentColor() {
-        return this.mCurrentColor;
-    }
 
     public void setColor(Color newColor) {
-        this.mCurrentColor = newColor;
+        if (!mEraseMode) {
+            this.mCurrentColor = newColor;
+        }
     }
 
     public void setStrokeWidth(float newStroke) {
         this.mCurrentSize = newStroke;
     }
 
-    public float getCurrentWidth(){
+    public float getCurrentWidth() {
         return this.mCurrentSize;
     }
 
 
-
     /**
-     * Yes this is NOT a real eraser, I believe a different approach would need to be implemented
+     * Yes this is NOT a real eraser, a different approach would need to be implemented
      */
     public void setEraserMode() {
-        mOldColor = mCurrentColor;
-        mCurrentColor = Color.WHITE;
+
         mEraseMode = true;
 
     }
 
     public void setPenMode() {
-        mCurrentColor = mOldColor;
+
         mEraseMode = false;
     }
 
@@ -177,7 +192,6 @@ public class CanvasView extends View implements View.OnTouchListener {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // your Canvas will draw onto the defined Bitmap
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
     }
@@ -187,7 +201,7 @@ public class CanvasView extends View implements View.OnTouchListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (mStrokes != null) {
-            for (Stroke stroke: mStrokes) {
+            for (Stroke stroke : mStrokes) {
                 if (stroke != null) {
                     Path path = stroke.getPath();
                     Paint painter = stroke.getPaint();
@@ -236,28 +250,74 @@ public class CanvasView extends View implements View.OnTouchListener {
     }
 
 
+    /**
+     * This playback isn't a true playback in that it only
+     * shows the paths but not the points being drawn.
+     * Could rewire this to output each point of the path.
+     *
+     * @param listener
+     */
+    public void playBack(CanvasPlayBackListener listener) {
+        if (!mPlaybackMode) {
+            mPlaybackMode = true;
+            this.mPlayBackListener = listener;
+
+            //Transfer strokes to temporary holder
+            mStrokesHolder.addAll(mStrokes);
+            mStrokes.clear();
+            invalidate();
+
+            drawOutStrokesOverTime();
+
+
+        }
+
+    }
+
+    private void drawOutStrokesOverTime() {
+        if (mStrokesHolder.size() > 0) {
+            mStrokes.push(mStrokesHolder.get(0));
+            mStrokesHolder.remove(0);
+            invalidate();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    drawOutStrokesOverTime();
+                }
+            }, Constants.MEDIUM_DURATION);
+        } else {
+            this.mPlayBackListener.onPlayBackFinished();
+            mPlaybackMode = false;
+        }
+
+    }
+
     //override the onTouchEvent
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
 
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                startTouch((int) x, (int) y);
-                if(mListener!=null)
-                    mListener.onTouch();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                pointMove(x, y);
+        if (!mPlaybackMode) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startTouch((int) x, (int) y);
+                    if (mListener != null)
+                        mListener.onTouch();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    pointMove(x, y);
 
-                break;
-            case MotionEvent.ACTION_UP:
+                    break;
+                case MotionEvent.ACTION_UP:
 
-                break;
+                    break;
+            }
+            invalidate();
+            return true;
+        } else {
+            return false;
         }
-        invalidate();
-        return true;
     }
 
     public Bitmap getBitmap() {

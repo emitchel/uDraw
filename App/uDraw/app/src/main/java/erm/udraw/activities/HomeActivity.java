@@ -233,6 +233,11 @@ public class HomeActivity extends BaseActivity {
                 .show();
     }
 
+    private void playBack(){
+        HomeFragment frag = getFragment();
+        frag.playBack();
+    }
+
     public HomeFragment getFragment(){
         FragmentManager fm = getSupportFragmentManager();
         HomeFragment fragment = (HomeFragment)fm.findFragmentById(R.id.canvas_fragment);
@@ -256,6 +261,9 @@ public class HomeActivity extends BaseActivity {
         } else if (id == R.id.import_image) {
             //TODO:
             //"From... Gallery or New Picture"
+            return true;
+        } else if(id == R.id.playback){
+            playBack();
             return true;
         } else if (id == R.id.about) {
             //TODO:
