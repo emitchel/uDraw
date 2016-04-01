@@ -8,9 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import erm.udraw.R;
 import erm.udraw.objects.Constants;
-
 
 
 public class SplashActivity extends BaseActivity {
@@ -26,7 +26,6 @@ public class SplashActivity extends BaseActivity {
         setContentView(R.layout.activity_splash);
         setUpObjects();
         gatherViews();
-
     }
 
     public void setUpObjects() {
@@ -78,7 +77,7 @@ public class SplashActivity extends BaseActivity {
     private void gatherViews() {
         mTitle = (TextView) findViewById(R.id.title);
         mSignature = (TextView) findViewById(R.id.signature);
-        mImage = (ImageView)findViewById(R.id.launcher);
+        mImage = (ImageView) findViewById(R.id.launcher);
     }
 
     @Override

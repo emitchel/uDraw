@@ -2,6 +2,7 @@ package erm.udraw.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,7 +11,10 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import javax.inject.Inject;
+
 import erm.udraw.R;
+import erm.udraw.applicaiton.DrawApp;
 
 /**
  * Created by ellio on 3/6/2016.
@@ -21,6 +25,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     public boolean bErrorPopupOpen;
 
     public abstract String getTag();
+
+    @Inject
+    public SharedPreferences mPreferences;
+
 
     /**
      * @param intent
@@ -53,6 +61,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((DrawApp)getApplication()).getStorageComponent().inject(this);
         log(getTag() + " was created");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow(); // in Activity's onCreate() for instance
@@ -60,6 +70,10 @@ public abstract class BaseActivity extends AppCompatActivity {
             w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
+    }
+
+    public SharedPreferences getSharedPreferences(){
+        return this.mPreferences;
     }
 
     @Override

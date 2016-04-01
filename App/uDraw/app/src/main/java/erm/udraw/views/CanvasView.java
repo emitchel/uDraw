@@ -27,7 +27,7 @@ import erm.udraw.objects.Utils;
  */
 public class CanvasView extends View implements View.OnTouchListener {
     private static float DEFAULT_STROKE_WIDTH = 12f;
-    private static final float TOLERANCE = 5;
+    private static final float TOLERANCE = 1;
 
     final Handler handler = new Handler();
 
@@ -284,6 +284,8 @@ public class CanvasView extends View implements View.OnTouchListener {
     }
 
     private void pointMove(float x, float y) {
+        //clear the undone paths since we're starting a new sequence
+        mUndoneStrokes.clear();
         //retrieve the stroke and add new point to its path
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);

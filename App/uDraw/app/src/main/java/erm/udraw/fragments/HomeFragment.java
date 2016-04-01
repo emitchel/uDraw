@@ -2,6 +2,7 @@ package erm.udraw.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -53,6 +54,8 @@ public class HomeFragment extends BaseFragment {
     ImageButton mDraw, mErase, mChooseColor, mUndo, mRedo;
     View mDrawSelected, mEraseSelected;
 
+    SharedPreferences localPreferences;
+
     public HomeFragment() {
         //empty constr per the docs
     }
@@ -60,6 +63,7 @@ public class HomeFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        localPreferences = getSharedPreferences();
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -197,6 +201,7 @@ public class HomeFragment extends BaseFragment {
             });
             mColorSelections.addView(colorView);
         }
+        //add the custom color section
     }
 
     private void setCustomListeners() {
