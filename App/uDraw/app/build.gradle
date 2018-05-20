@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "erm.udraw"
@@ -29,10 +29,19 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
 
 
-  compile 'com.google.dagger:dagger:2.13'
-  annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
+    compile 'com.google.dagger:dagger:2.13'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
     //javax.annotation
     provided 'org.glassfish:javax.annotation:10.0-b28'
 }
 
 
+
+repositories {
+    google()
+}
+buildscript {
+    repositories {
+        google()
+    }
+}
