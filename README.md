@@ -1,2 +1,2 @@
 # uDraw
-A esthetically pleasing, simple drawing app.
+An esthetically pleasing, simple drawing app.
