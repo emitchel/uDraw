@@ -1,47 +1,56 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '27.0.3'
+  compileSdkVersion 23
+  buildToolsVersion '27.0.3'
 
-    defaultConfig {
-        applicationId "erm.udraw"
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
-        setProperty("archivesBaseName", applicationId + "-v" + versionCode + "(" + versionName + ")")
+  defaultConfig {
+    applicationId "erm.udraw"
+    minSdkVersion 16
+    targetSdkVersion 23
+    versionCode 1
+    versionName "1.0"
+    setProperty("archivesBaseName", applicationId + "-v" + versionCode + "(" + versionName + ")")
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+  }
 }
 
 
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+  testCompile 'junit:junit:4.12'
+  compile 'com.android.support:appcompat-v7:23.2.0'
+  compile 'com.android.support:design:23.2.0'
 
 
-    compile 'com.google.dagger:dagger:2.13'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
-    //javax.annotation
-    provided 'org.glassfish:javax.annotation:10.0-b28'
+  compile 'com.google.dagger:dagger:2.13'
+  annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
+  //javax.annotation
+  provided 'org.glassfish:javax.annotation:10.0-b28'
+
+  testCompile "org.robolectric:robolectric:3.8"
+  androidTestImplementation 'junit:junit:4.12'
 }
 
-
+android {
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+}
 
 repositories {
-    google()
+  google()
 }
 buildscript {
-    repositories {
-        google()
-    }
+  repositories {
+    google()
+  }
 }
