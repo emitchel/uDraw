@@ -9,7 +9,7 @@ import erm.udraw.dagger.modules.UDrawModule;
  * Created by elliot-mitchell on 3/31/2016.
  */
 public class DrawApp extends Application {
-  UDrawComponent injectionComponent;
+  private UDrawComponent injectionComponent;
 
   @Override
   public void onCreate() {
