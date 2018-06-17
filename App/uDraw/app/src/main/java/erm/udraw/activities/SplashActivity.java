@@ -2,7 +2,6 @@ package erm.udraw.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,78 +9,77 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import erm.udraw.R;
-import erm.udraw.objects.Constants;
-
+import erm.udraw.utils.Constants;
 
 public class SplashActivity extends BaseActivity {
 
-    TextView mTitle, mSignature;
-    ImageView mImage;
+  private TextView title;
+  private TextView signature;
+  private ImageView image;
 
-    Context mContext;
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_splash);
+    gatherViews();
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        setUpObjects();
-        gatherViews();
-    }
+  @Override
+  public void onStart() {
+    super.onStart();
+    animateUI();
+  }
 
-    public void setUpObjects() {
-        this.mContext = this;
-    }
+  private void animateUI() {
+    //Fade in image
+    image.animate().alpha(1f).setDuration(Constants.Durations.LONG_DURATION).setListener(null);
+    //Fade in Title
+    title.animate()
+        .alpha(1f)
+        .setDuration(Constants.Durations.LONG_DURATION)
+        .setListener(new AnimatorListenerAdapter() {
+          @Override
+          public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            //Fade in signature
+            signature.animate()
+                .alpha(1f)
+                .setDuration(Constants.Durations.LONG_DURATION)
+                .setListener(new AnimatorListenerAdapter() {
+                  @Override
+                  public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        animateUI();
-    }
-
-    private void animateUI() {
-        //Fade in image
-        mImage.animate().alpha(1f).setDuration(Constants.LONG_DURATION).setListener(null);
-        //Fade in Title
-        mTitle.animate().alpha(1f).setDuration(Constants.LONG_DURATION).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                //Fade in siganature
-                mSignature.animate().alpha(1f).setDuration(Constants.LONG_DURATION).setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-
-                        //Send off to main activity after 1s
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                goToHomeActivity();
-
-                            }
-                        }, Constants.SUPER_LONG_DURATION);
-                    }
+                    //Send off to main activity after 1s
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                      @Override
+                      public void run() {
+                        goToHomeActivity();
+                      }
+                    }, Constants.Durations.SUPER_LONG_DURATION);
+                  }
                 });
-            }
+          }
         });
-    }
+  }
 
-    private void goToHomeActivity() {
-        log("Going to HomeActivity Activity");
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        goToActivity(intent, null, 0, 0);
-    }
+  private void goToHomeActivity() {
+    log("Going to HomeActivity Activity");
+    Intent intent = new Intent(this, HomeActivity.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+    startActivity(intent);
+  }
 
-    private void gatherViews() {
-        mTitle = (TextView) findViewById(R.id.title);
-        mSignature = (TextView) findViewById(R.id.signature);
-        mImage = (ImageView) findViewById(R.id.launcher);
-    }
+  private void gatherViews() {
+    //TODO: import butterknife or convert to kotlin to remove the need for this
+    title = (TextView) findViewById(R.id.title);
+    signature = (TextView) findViewById(R.id.signature);
+    image = (ImageView) findViewById(R.id.launcher);
+  }
 
-    @Override
-    public String getTag() {
-        return "Splash Activity";
-    }
+  @Override
+  public String getTag() {
+    return "Splash Activity";
+  }
 }

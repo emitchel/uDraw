@@ -4,10 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-
-import javax.inject.Inject;
-
 import erm.udraw.applicaiton.DrawApp;
+import javax.inject.Inject;
 
 /**
  * Created by ellio on 3/6/2016.
@@ -16,25 +14,17 @@ import erm.udraw.applicaiton.DrawApp;
  */
 public abstract class BaseFragment extends Fragment {
 
-    @Inject
-    public SharedPreferences mPreferences;
+  @Inject
+  public SharedPreferences prefrences;
 
-    public void log(String msg){
-        Log.i(getTag(), msg);
-    }
+  public void log(String msg) {
+    Log.i(getTag(), msg);
+  }
 
-    public void log(String title, String msg){
-        Log.i(title,msg);
-    }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-    @Override
-    public void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-
-        ((DrawApp)getActivity().getApplication()).getStorageComponent().inject(this);
-    }
-
-    public SharedPreferences getSharedPreferences(){
-        return this.mPreferences;
-    }
+    ((DrawApp) getActivity().getApplication()).getComponent().inject(this);
+  }
 }

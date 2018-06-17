@@ -1,21 +1,23 @@
 package erm.udraw.applicaiton;
 
 import android.app.Application;
-
-import erm.udraw.dagger.components.DaggerStorageComponent;
-import erm.udraw.dagger.components.StorageComponent;
-import erm.udraw.dagger.modules.StorageModule;
+import erm.udraw.dagger.components.DaggerUDrawComponent;
+import erm.udraw.dagger.components.UDrawComponent;
+import erm.udraw.dagger.modules.UDrawModule;
 
 /**
  * Created by elliot-mitchell on 3/31/2016.
  */
 public class DrawApp extends Application {
-    StorageComponent sharedPreferencesStorageComponent;
-    @Override
-    public void onCreate(){
-        super.onCreate();
-        sharedPreferencesStorageComponent = DaggerStorageComponent.builder().storageModule(new StorageModule(this)).build();
-    }
+  UDrawComponent injectionComponent;
 
-    public StorageComponent getStorageComponent(){return sharedPreferencesStorageComponent;}
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    injectionComponent = DaggerUDrawComponent.builder().uDrawModule(new UDrawModule(this)).build();
+  }
+
+  public UDrawComponent getComponent() {
+    return injectionComponent;
+  }
 }

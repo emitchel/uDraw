@@ -1,4 +1,4 @@
-package erm.udraw.objects;
+package erm.udraw.utils;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
