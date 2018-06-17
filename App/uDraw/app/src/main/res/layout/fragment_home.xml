@@ -4,194 +4,208 @@
     android:layout_height="match_parent"
     android:background="@color/icons"
     tools:context=".fragments.HomeFragment"
+    tools:showIn="@layout/activity_home"
+    >
+  <erm.udraw.views.CanvasView
+      android:id="@+id/canvas"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      />
 
-    tools:showIn="@layout/activity_home">
+  <TextView
+      android:id="@+id/playback"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:layout_margin="@dimen/default_padding"
+      android:alpha="0"
+      android:background="@drawable/round_all_corners"
+      android:padding="@dimen/default_padding"
+      android:text="@string/playing_back"
+      android:textColor="@color/icons"
+      android:visibility="gone"
+      />
+  <RelativeLayout
+      android:id="@+id/line_width_wrapper"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/bar_height"
+      android:layout_alignLeft="@+id/action_wrapper"
+      android:layout_alignParentBottom="true"
+      android:layout_alignRight="@+id/action_wrapper"
+      android:layout_centerHorizontal="true"
+      android:background="@drawable/round_top_left_right_corners"
+      >
 
-
-    
-
-    <erm.udraw.views.CanvasView
-        android:id="@+id/canvas"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/action_wrapper" />
-
-    <TextView
-        android:id="@+id/playback"
+    <ImageView
+        android:id="@+id/line_width_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/default_padding"
-        android:padding="@dimen/default_padding"
-        android:alpha="0"
-        android:background="@drawable/round_all_corners"
-        android:textColor="@color/icons"
-        android:text="@string/playing_back"
-        android:visibility="gone"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding_half"
+        android:src="@drawable/ic_line_weight_black_36dp"
         />
-    <RelativeLayout
-        android:id="@+id/line_width_wrapper"
+
+    <TextView
+        android:id="@+id/line_width_value"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/line_width_image"
+        android:singleLine="true"
+        android:text="100"
+        android:textColor="@color/black"
+        />
+
+    <android.support.v7.widget.AppCompatSeekBar
+        android:id="@+id/line_width_seekbar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bar_height"
-        android:layout_alignLeft="@+id/action_wrapper"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/action_wrapper"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/round_top_left_right_corners">
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/line_width_value"
+        android:max="100"
+        android:paddingLeft="@dimen/default_padding_quarter"
+        ></android.support.v7.widget.AppCompatSeekBar>
 
-        <ImageView
-            android:id="@+id/line_width_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding"
-            android:paddingRight="@dimen/default_padding_half"
-            android:src="@drawable/ic_line_weight_black_36dp" />
+  </RelativeLayout>
 
-        <TextView
-            android:id="@+id/line_width_value"
-            android:layout_width="25dp"
-            android:singleLine="true"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/line_width_image"
-            android:text="100"
-            android:textColor="@color/black" />
+  <RelativeLayout
+      android:id="@+id/color_wrapper"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/bar_height"
+      android:layout_alignLeft="@+id/action_wrapper"
+      android:layout_alignParentBottom="true"
+      android:layout_alignRight="@+id/action_wrapper"
+      android:layout_centerHorizontal="true"
+      android:background="@drawable/round_top_left_right_corners"
+      >
 
-        <android.support.v7.widget.AppCompatSeekBar
-            android:id="@+id/line_width_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/line_width_value"
-            android:max="100"
-            android:paddingLeft="@dimen/default_padding_quarter"></android.support.v7.widget.AppCompatSeekBar>
+    <HorizontalScrollView
+        android:id="@+id/color_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        >
 
-    </RelativeLayout>
+      <LinearLayout
+          android:id="@+id/color_selections"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:padding="@dimen/default_padding"
+          ></LinearLayout>
+    </HorizontalScrollView>
+
+
+  </RelativeLayout>
+
+  <LinearLayout
+      android:id="@id/action_wrapper"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/bar_height"
+      android:layout_alignParentBottom="true"
+      android:layout_centerHorizontal="true"
+      android:background="@drawable/round_top_left_right_corners"
+      android:elevation="10dp"
+      android:orientation="horizontal"
+      >
 
     <RelativeLayout
-        android:id="@+id/color_wrapper"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/bar_height"
-        android:layout_alignLeft="@+id/action_wrapper"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/action_wrapper"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/round_top_left_right_corners">
-
-        <HorizontalScrollView
-            android:id="@+id/color_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/color_selections"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/default_padding"></LinearLayout>
-        </HorizontalScrollView>
-
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@id/action_wrapper"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/bar_height"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/round_top_left_right_corners"
-        android:elevation="10dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        >
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+      <View
+          android:id="@+id/draw_selected"
+          android:layout_width="36dp"
 
-            <View
-                android:id="@+id/draw_selected"
-                android:layout_width="36dp"
+          android:layout_height="4dp"
+          android:layout_centerHorizontal="true"
+          android:background="@color/accent"
+          />
 
-                android:layout_height="4dp"
-                android:layout_centerHorizontal="true"
-                android:background="@color/accent" />
+      <ImageButton
+          android:id="@+id/draw"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="?attr/selectableItemBackgroundBorderless"
 
-            <ImageButton
-                android:id="@+id/draw"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
+          android:padding="@dimen/default_padding"
+          android:src="@drawable/ic_action_pen"
+          />
 
-                android:padding="@dimen/default_padding"
-                android:src="@drawable/ic_action_pen" />
+    </RelativeLayout>
 
-        </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+      <View
+          android:id="@+id/erase_selected"
+          android:layout_width="36dp"
+          android:layout_height="4dp"
+          android:layout_centerHorizontal="true"
+          android:alpha="0"
+          android:background="@color/accent"
+          />
 
-            <View
-                android:id="@+id/erase_selected"
-                android:layout_width="36dp"
-                android:layout_height="4dp"
-                android:layout_centerHorizontal="true"
-                android:alpha="0"
-                android:background="@color/accent" />
+      <ImageButton
+          android:id="@+id/erase"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="?attr/selectableItemBackgroundBorderless"
+          android:padding="@dimen/default_padding"
+          android:src="@drawable/ic_action_erase"
+          />
+    </RelativeLayout>
 
-            <ImageButton
-                android:id="@+id/erase"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="@dimen/default_padding"
-                android:src="@drawable/ic_action_erase" />
-        </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        >
 
-        <RelativeLayout
-            android:layout_width="68dp"
-            android:layout_height="68dp">
+      <ImageButton
+          android:id="@+id/color"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="?attr/selectableItemBackgroundBorderless"
+          android:padding="@dimen/default_padding"
+          android:src="@drawable/ic_color_lens_black_36dp"
+          />
 
-            <ImageButton
-                android:id="@+id/color"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="@dimen/default_padding"
-                android:src="@drawable/ic_color_lens_black_36dp" />
+      <View
+          android:id="@+id/color_choice"
+          android:layout_width="15dp"
+          android:layout_height="15dp"
+          android:layout_alignParentBottom="true"
+          android:layout_alignParentRight="true"
+          android:layout_margin="@dimen/default_padding_half"
+          android:background="@drawable/color_select"
+          />
+    </RelativeLayout>
 
-            <View
-                android:id="@+id/color_choice"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_margin="@dimen/default_padding_half"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:background="@drawable/color_select" />
-        </RelativeLayout>
+    <ImageButton
+        android:id="@+id/undo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="@dimen/default_padding"
+        android:src="@drawable/ic_undo_black_36dp"
+        />
 
-        <ImageButton
-            android:id="@+id/undo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/default_padding"
-            android:src="@drawable/ic_undo_black_36dp" />
+    <ImageButton
+        android:id="@+id/redo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="@dimen/default_padding"
+        android:src="@drawable/ic_redo_black_36dp"
 
-        <ImageButton
-            android:id="@+id/redo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/default_padding"
-            android:src="@drawable/ic_redo_black_36dp"
+        />
 
-            />
-
-    </LinearLayout>
+  </LinearLayout>
 
 
 </RelativeLayout>
